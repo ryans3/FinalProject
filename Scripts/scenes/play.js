@@ -18,6 +18,7 @@ var scenes;
      */
     var Play = (function (_super) {
         __extends(Play, _super);
+        /*+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
         /**
          * @constructor
          */
@@ -70,7 +71,7 @@ var scenes;
         Play.prototype.setupScoreboard = function () {
             // initialize  score and lives values
             this.scoreValue = 0;
-            this.livesValue = 5;
+            this.livesValue = 1;
             // Add Lives Label
             this.livesLabel = new createjs.Text("LIVES: " + this.livesValue, "40px Consolas", "#ffffff");
             this.livesLabel.x = config.Screen.WIDTH * 0.1;
@@ -145,7 +146,7 @@ var scenes;
          */
         Play.prototype.addPlayer = function () {
             // Player Object
-            this.playerGeometry = new BoxGeometry(2, 4, 2);
+            this.playerGeometry = new BoxGeometry(3, 2, 4);
             this.playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0.4, 0);
             this.player = new Physijs.BoxMesh(this.playerGeometry, this.playerMaterial, 1);
             this.player.position.set(0, 30, 10);
@@ -337,7 +338,7 @@ var scenes;
             // Add player controller
             this.addPlayer();
             // Add custom coin imported from Blender
-            this.addCoinMesh();
+            //this.addCoinMesh();
             // Add death plane to the scene
             this.addDeathPlane();
             // Collision Check
@@ -385,12 +386,13 @@ var scenes;
          * @returns void
          */
         Play.prototype.update = function () {
-            this.coins.forEach(function (coin) {
-                coin.setAngularFactor(new Vector3(0, 0, 0));
-                coin.setAngularVelocity(new Vector3(0, 1, 0));
-            });
+            // this.coins.forEach(coin => {
+            //     coin.setAngularFactor(new Vector3(0, 0, 0));
+            //     coin.setAngularVelocity(new Vector3(0, 1, 0));
+            // });
             this.checkControls();
             this.stage.update();
+            //this.createNewEnemies();
         };
         /**
          * Responds to screen resizes
@@ -405,6 +407,29 @@ var scenes;
             this.scoreLabel.x = config.Screen.WIDTH * 0.8;
             this.scoreLabel.y = (config.Screen.HEIGHT * 0.15) * 0.20;
             this.stage.update();
+        };
+        //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        Play.prototype.createNewEnemies = function () {
+            this.enemyGeometry = new BoxGeometry(4, 4, 4);
+            this.enemyMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0xff0000 }), 0.4, 0);
+            this.enemyOne = new Physijs.BoxMesh(this.enemyGeometry, this.enemyMaterial, 1);
+            this.enemyOne.position.set(8, 8, 8);
+            this.enemyOne.receiveShadow = true;
+            this.enemyOne.castShadow = true;
+            this.enemyOne.name = "Enemy One";
+            this.enemyTwo = new Physijs.BoxMesh(this.enemyGeometry, this.enemyMaterial, 1);
+            this.enemyTwo.position.set(-8, 8, 8);
+            this.enemyTwo.receiveShadow = true;
+            this.enemyTwo.castShadow = true;
+            this.enemyTwo.name = "Enemy Two";
+            this.enemyThree = new Physijs.BoxMesh(this.enemyGeometry, this.enemyMaterial, 1);
+            this.enemyThree.position.set(6, 8, 8);
+            this.enemyThree.receiveShadow = true;
+            this.enemyThree.castShadow = true;
+            this.enemyThree.name = "Enemy Three";
+            this.add(this.enemyOne);
+            this.add(this.enemyTwo);
+            this.add(this.enemyThree);
         };
         return Play;
     })(scenes.Scene);

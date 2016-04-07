@@ -29,10 +29,14 @@ module scenes {
         private keyboardControls: objects.KeyboardControls;
         private mouseControls: objects.MouseControls;
         private isGrounded: boolean;
+        
+        
+        
         private coinGeometry: Geometry;
         private coinMaterial: Physijs.Material;
         private coins: Physijs.ConcaveMesh[];
         private coinCount: number;
+        
         private deathPlaneGeometry: CubeGeometry;
         private deathPlaneMaterial: Physijs.Material;
         private deathPlane: Physijs.Mesh;
@@ -437,7 +441,7 @@ module scenes {
             this.addPlayer();
 
             // Add custom coin imported from Blender
-            this.addCoinMesh();
+            //this.addCoinMesh();
 
             // Add death plane to the scene
             this.addDeathPlane();
@@ -497,13 +501,14 @@ module scenes {
          */
         public update(): void {
 
-            this.coins.forEach(coin => {
-                coin.setAngularFactor(new Vector3(0, 0, 0));
-                coin.setAngularVelocity(new Vector3(0, 1, 0));
-            });
+            // this.coins.forEach(coin => {
+            //     coin.setAngularFactor(new Vector3(0, 0, 0));
+            //     coin.setAngularVelocity(new Vector3(0, 1, 0));
+            // });
 
             this.checkControls();
             this.stage.update();
+            //this.createNewEnemies();
         }
 
         /**
