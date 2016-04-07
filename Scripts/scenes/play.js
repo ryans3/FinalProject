@@ -56,6 +56,9 @@ var scenes;
             this.prevTime = 0;
             this.stage = new createjs.Stage(canvas);
             this.velocity = new Vector3(0, 0, 0);
+            this.playersZPosition = 0;
+            this.generatorCounter = 0;
+            this.nextGroundZPosition = 55;
             // setup a THREE.JS Clock object
             this.clock = new Clock();
             // Instantiate Game Controls
@@ -130,13 +133,69 @@ var scenes;
             this.groundMaterial.map = this.groundTexture;
             this.groundMaterial.bumpMap = this.groundTextureNormal;
             this.groundMaterial.bumpScale = 0.2;
-            this.groundGeometry = new BoxGeometry(32, 1, 32);
+            this.groundGeometry = new BoxGeometry(32, 1, 50);
             this.groundPhysicsMaterial = Physijs.createMaterial(this.groundMaterial, 0, 0);
             this.ground = new Physijs.ConvexMesh(this.groundGeometry, this.groundPhysicsMaterial, 0);
             this.ground.receiveShadow = true;
             this.ground.name = "Ground";
             this.add(this.ground);
             console.log("Added Burnt Ground to scene");
+        };
+        Play.prototype.initializeFirstGround = function () {
+            this.groundTexture = new THREE.TextureLoader().load('../../Assets/images/GravelCobble.jpg');
+            this.groundTexture.wrapS = THREE.RepeatWrapping;
+            this.groundTexture.wrapT = THREE.RepeatWrapping;
+            this.groundTexture.repeat.set(8, 8);
+            this.groundTextureNormal = new THREE.TextureLoader().load('../../Assets/images/GravelCobbleNormal.png');
+            this.groundTextureNormal.wrapS = THREE.RepeatWrapping;
+            this.groundTextureNormal.wrapT = THREE.RepeatWrapping;
+            this.groundTextureNormal.repeat.set(8, 8);
+            this.groundMaterial = new PhongMaterial();
+            this.groundMaterial.map = this.groundTexture;
+            this.groundMaterial.bumpMap = this.groundTextureNormal;
+            this.groundMaterial.bumpScale = 0.2;
+            this.groundGeometry = new BoxGeometry(32, 1, 50);
+            this.groundPhysicsMaterial = Physijs.createMaterial(this.groundMaterial, 0, 0);
+            this.ground = new Physijs.ConvexMesh(this.groundGeometry, this.groundPhysicsMaterial, 0);
+            this.ground.receiveShadow = true;
+            this.ground.position.set(0, 0, 0);
+            this.ground.name = "Ground";
+            this.add(this.ground);
+            console.log("Added Burnt Ground to scene");
+        };
+        Play.prototype.initializeSecondGround = function () {
+            this.groundTextureNext = new THREE.TextureLoader().load('../../Assets/images/road-seamless.jpg');
+            this.groundTextureNext.wrapS = THREE.RepeatWrapping;
+            this.groundTextureNext.wrapT = THREE.RepeatWrapping;
+            this.groundTextureNext.repeat.set(8, 8);
+            this.groundTextureNormalNext = new THREE.TextureLoader().load('../../Assets/images/road-seamless.jpg');
+            this.groundTextureNormalNext.wrapS = THREE.RepeatWrapping;
+            this.groundTextureNormalNext.wrapT = THREE.RepeatWrapping;
+            this.groundTextureNormalNext.repeat.set(8, 8);
+            this.groundMaterialNext = new PhongMaterial();
+            this.groundMaterialNext.map = this.groundTexture;
+            this.groundMaterialNext.bumpMap = this.groundTextureNormal;
+            this.groundMaterialNext.bumpScale = 0.2;
+            this.groundGeometryNext = new BoxGeometry(32, 1, 50);
+            this.groundPhysicsMaterialNext = Physijs.createMaterial(this.groundMaterialNext, 0, 0);
+            this.groundNext = new Physijs.ConvexMesh(this.groundGeometryNext, this.groundPhysicsMaterial, 0);
+            this.groundNext.receiveShadow = true;
+            this.groundNext.name = "Ground";
+            this.groundNext.position.set(0, 0, this.nextGroundZPosition);
+            this.add(this.groundNext);
+            console.log("Added Road Ground to scene");
+        };
+        Play.prototype.createNewGround = function () {
+            if (this.generatorCounter % 2 == 0) {
+                this.remove(this.groundNext);
+                this.groundNext.position.set(0, 0, this.nextGroundZPosition);
+                this.add(this.groundNext);
+            }
+            else if (this.generatorCounter % 2 != 0) {
+                this.remove(this.ground);
+                this.ground.position.set(0, 0, this.nextGroundZPosition);
+                this.add(this.ground);
+            }
         };
         /**
          * Adds the player controller to the scene
@@ -146,7 +205,7 @@ var scenes;
          */
         Play.prototype.addPlayer = function () {
             // Player Object
-            this.playerGeometry = new BoxGeometry(3, 2, 4);
+            this.playerGeometry = new BoxGeometry(2, 2, 3);
             this.playerMaterial = Physijs.createMaterial(new LambertMaterial({ color: 0x00ff00 }), 0.4, 0);
             this.player = new Physijs.BoxMesh(this.playerGeometry, this.playerMaterial, 1);
             this.player.position.set(0, 30, 10);
@@ -265,9 +324,10 @@ var scenes;
                     if (this.keyboardControls.moveRight) {
                         this.velocity.x += 400.0 * delta;
                     }
+                    //Add Super Jump here
                     if (this.keyboardControls.jump) {
-                        this.velocity.y += 4000.0 * delta;
-                        if (this.player.position.y > 4) {
+                        this.velocity.y += 5000.0 * delta;
+                        if (this.player.position.y > 40) {
                             this.isGrounded = false;
                             createjs.Sound.play("jump");
                         }
@@ -334,7 +394,9 @@ var scenes;
             // Add Spot Light to the scene
             this.addSpotLight();
             // Ground Object
-            this.addGround();
+            this.initializeFirstGround();
+            // Ground Second Object
+            this.initializeSecondGround();
             // Add player controller
             this.addPlayer();
             // Add custom coin imported from Blender
@@ -363,10 +425,20 @@ var scenes;
                     this.add(this.player);
                 }
             }.bind(this));
-            // create parent-child relationship with camera and player
+            // create parent-child relationship with camera and player 
             this.player.add(camera);
             camera.position.set(0, 1, 0);
             this.simulate();
+        };
+        Play.prototype.playerPositionCheck = function () {
+            this.playersZPosition = this.player.position.z;
+            if (this.playersZPosition > this.nextGroundZPosition) {
+                this.nextGroundZPosition += 55;
+                console.log("Player z: " + this.player.position.z + "\n");
+                this.generatorCounter++;
+                console.log(this.generatorCounter);
+                this.createNewGround();
+            }
         };
         /**
          * Camera Look function
@@ -392,6 +464,10 @@ var scenes;
             // });
             this.checkControls();
             this.stage.update();
+            this.playerPositionCheck();
+            //console.log("X"+this.player.position.x);
+            //console.log("Y"+this.player.position.x);
+            //console.log("Z"+this.player.position.z);
             //this.createNewEnemies();
         };
         /**
